@@ -51,23 +51,35 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CalculatorApp(modifier: Modifier = Modifier) {
     var expression by rememberSaveable { mutableStateOf("") }
-    var result by rememberSaveable { mutableStateOf("") }
+    var isResultDisplayed by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-        CalculatorDisplay(expression, result)
+        CalculatorDisplay(expression)
         Spacer(modifier = Modifier.height(16.dp))
         CalculatorButtonsGrid { value ->
             when (value) {
-                "=" -> result = calculateExpression(expression)
+                "=" -> {
+                    expression = calculateExpression(expression)
+                    isResultDisplayed = true
+                }
                 "C" -> {
                     expression = ""
-                    result = ""
+                    isResultDisplayed = false
                 }
-                else -> expression += value
+                else -> {
+                    if (isResultDisplayed) {
+                        expression = value
+                        isResultDisplayed = false
+                    } else {
+                        expression += value
+                    }
+                }
             }
         }
     }
 }
+
+
 @Preview(showBackground = true)
 @Composable
 fun CalculatorAppPreview() {
@@ -76,11 +88,12 @@ fun CalculatorAppPreview() {
     }
 }
 
+
+
 @Composable
-fun CalculatorDisplay(expression: String, result: String) {
+fun CalculatorDisplay(expression: String) {
     Column {
-        Text(text = "Expression: $expression", style = MaterialTheme.typography.headlineMedium)
-        Text(text = "Result: $result", style = MaterialTheme.typography.displayMedium)
+        Text(text = expression, style = MaterialTheme.typography.displayMedium)
     }
 }
 
@@ -88,13 +101,9 @@ fun CalculatorDisplay(expression: String, result: String) {
 @Composable
 fun CalculatorDisplayPreview() {
     CalcTheme {
-        CalculatorDisplay(
-            expression = "1+2",
-            result = "3"
-        )
+        CalculatorDisplay(expression = "1+2=3")
     }
 }
-
 
 
 @Composable
@@ -124,6 +133,7 @@ fun CalculatorButtonsGrid(onButtonClick: (String) -> Unit) {
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun CalculatorButtonsGridPreview() {
@@ -131,7 +141,6 @@ fun CalculatorButtonsGridPreview() {
         CalculatorButtonsGrid(onButtonClick = {})
     }
 }
-
 
 
 fun calculateExpression(expression: String): String {
@@ -164,7 +173,6 @@ fun evaluateExpression(expression: String): Double {
         numbers.add(currentNumber.toDouble())
     }
 
-
     var index = 0
     while (index < operators.size) {
         when (operators[index]) {
@@ -182,7 +190,6 @@ fun evaluateExpression(expression: String): Double {
         }
     }
 
-
     var result = numbers[0]
     for (i in operators.indices) {
         when (operators[i]) {
@@ -193,3 +200,6 @@ fun evaluateExpression(expression: String): Double {
 
     return result
 }
+
+
+
